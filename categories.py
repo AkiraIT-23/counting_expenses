@@ -1,5 +1,13 @@
 categories = [
     {
+        "name": "Посмотреть расходы",
+        "subcategories": [
+            {
+                "name": "Маркет",
+                "expenses": []
+            }],
+    },
+    {
         "name": "Еда",
         "subcategories": [
             {
@@ -98,8 +106,8 @@ categories = [
             }
         ]
     },
-{
-                             "name": "Добавить деньги на бюджет",
-                             "subcategories": [],
-                         }
+    {
+        "name": "Добавить деньги на бюджет",
+        "subcategories": [],
+    },
 ]
