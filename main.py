@@ -5,7 +5,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 # Импорт категорий из вашего файла
 from categories import categories
 
-bot = telebot.TeleBot("5951286666:AAFN49EztoIhQn7Fh_Jsk2cUk-aV87yfOak")
+bot = telebot.TeleBot(config("TOKEN"))
 
 total_budget = 0
 user_categories = categories  # Используем категории из вашего файла
