@@ -5,11 +5,12 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 # Импорт категорий из вашего файла
 from categories import categories
 
-bot = telebot.TeleBot(config("TOKEN"))
+bot = telebot.TeleBot("5951286666:AAFN49EztoIhQn7Fh_Jsk2cUk-aV87yfOak")
 
 total_budget = 0
 user_categories = categories  # Используем категории из вашего файла
 user_data = {}  # Добавляем словарь для хранения данных пользователя
+common_expenses = []
 
 
 @bot.message_handler(commands=["start", "testing"])
@@ -79,7 +80,21 @@ def process_subcategory(message):
         bot.register_next_step_handler(message, process_income)
     else:
         bot.send_message(message.chat.id, "Введите сумму расхода:")
-        bot.register_next_step_handler(message, process_expense)
+        bot.register_next_step_handler(message, process_expense, user_data[message.chat.id]["subcategory"])
+
+
+def counting_expenses(exp, categ):
+    global common_expenses
+    common_expenses.append({"category": categ, "expenses": exp})
+
+
+def format_expenses():
+    global common_expenses
+    result_text = ""
+    for item in common_expenses:
+        result_text += ">>>" + item["category"] + ":    " + str(item["expenses"])+"!"
+        result_text = result_text.replace("!", "\n")
+    return result_text
 
 
 def process_income(message):
@@ -94,16 +109,22 @@ def process_income(message):
                          "Вы ввели неправильную сумму. Пожалуйста, введите сумму для добавления на бюджет цифрами.")
 
 
-def process_expense(message):
+def process_expense(message, *args):
     global total_budget
+    subcategory = args[0]
     try:
         expense = int(message.text)
+        print("process_expense message: ", message.text)
+        print("process_expense subcateg: ", args[0])
         if expense > total_budget:
             bot.send_message(message.chat.id, f"Недостаточно средств для списания {expense} рублей.\n"
                                               f"На вашем счету :{total_budget}")
         else:
             total_budget -= expense
-            bot.send_message(message.chat.id, f"Списано {expense} рублей. Остаток бюджета: {total_budget} рублей.")
+            counting_expenses(expense, subcategory)
+            bot.send_message(message.chat.id, f"Списано {expense} рублей.\n"
+                                              f"Остаток бюджета: {total_budget} рублей.\n"
+                                              f"По категориям:\n{format_expenses()}")
         show_categories(message.chat.id)  # Позволяем пользователю выбрать следующую категорию
     except ValueError:
         bot.send_message(message.chat.id,
