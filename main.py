@@ -125,11 +125,11 @@ def process_expense(message, *args):
         print("process_expense message: ", message.text)
         print("process_expense subcateg: ", args[0])
         if expense > total_budget:
-            bot.send_message(message.chat.id, f"Недостаточно средств для списания {expense} рублей.\n"
+            bot.send_message(message.chat.id, f"Недостаточно средств для списания {expense} сомов.\n"
                                               f"На вашем счету :{total_budget}")
         else:
             total_budget -= expense
-            bot.send_message(message.chat.id, f"Списано {expense} рублей. Остаток бюджета: {total_budget} рублей.")
+            bot.send_message(message.chat.id, f"Списано {expense} сомов. Остаток бюджета: {total_budget} сомов.")
         show_categories(message.chat.id)  # Позволяем пользователю выбрать следующую категорию
     except ValueError:
         bot.send_message(message.chat.id,
