@@ -8,6 +8,7 @@ from categories import categories
 bot = telebot.TeleBot(config("TOKEN"))
 
 total_budget = 0
+total_budget2 = 0
 user_categories = categories  # Используем категории из вашего файла
 user_data = {}  # Добавляем словарь для хранения данных пользователя
 common_expenses = []
@@ -32,9 +33,11 @@ def ask_for_budget(message):
 
 def process_budget(message):
     global total_budget
+    global total_budget2
     try:
         budget = int(message.text)
         total_budget = budget
+        total_budget2 = budget
         bot.send_message(message.chat.id, f"Ваш новый бюджет установлен: {total_budget}")
         user_data[message.chat.id] = {}  # Создаем пустой словарь для пользователя
         show_categories(message.chat.id)
@@ -57,6 +60,9 @@ def process_category(message):
     if message.text == "Добавить деньги на бюджет":
         bot.send_message(message.chat.id, "Введите сумму для добавления на бюджет:")
         bot.register_next_step_handler(message, process_income)
+    elif message.text == "Посмотреть расходы":
+        bot.send_message(message.chat.id, f"Общая сумма расхода состовляет: {total_budget2 - total_budget}")
+        show_categories(message.chat.id)
     else:
         show_subcategories(message.chat.id, message.text)  # Показываем подкатегории
 
@@ -71,6 +77,7 @@ def show_subcategories(chat_id, category_name):
         bot.register_next_step_handler_by_chat_id(chat_id, process_subcategory)
     else:
         bot.send_message(chat_id, "Что-то пошло не так. Пожалуйста, выберите категорию заново.")
+        bot.register_next_step_handler_by_chat_id(chat_id, show_categories)
 
 
 def process_subcategory(message):
@@ -102,11 +109,12 @@ def process_income(message):
     try:
         income = int(message.text)
         total_budget += income
-        bot.send_message(message.chat.id, f"Добавлено {income} рублей. Остаток бюджета: {total_budget} рублей.")
+        bot.send_message(message.chat.id, f"Добавлено {income} сомов. Остаток бюджета: {total_budget} сомов.")
         show_categories(message.chat.id)  # Позволяем пользователю выбрать следующую категорию
     except ValueError:
         bot.send_message(message.chat.id,
                          "Вы ввели неправильную сумму. Пожалуйста, введите сумму для добавления на бюджет цифрами.")
+        bot.register_next_step_handler(message, process_income)
 
 
 def process_expense(message, *args):
@@ -117,14 +125,11 @@ def process_expense(message, *args):
         print("process_expense message: ", message.text)
         print("process_expense subcateg: ", args[0])
         if expense > total_budget:
-            bot.send_message(message.chat.id, f"Недостаточно средств для списания {expense} рублей.\n"
+            bot.send_message(message.chat.id, f"Недостаточно средств для списания {expense} сомов.\n"
                                               f"На вашем счету :{total_budget}")
         else:
             total_budget -= expense
-            counting_expenses(expense, subcategory)
-            bot.send_message(message.chat.id, f"Списано {expense} рублей.\n"
-                                              f"Остаток бюджета: {total_budget} рублей.\n"
-                                              f"По категориям:\n{format_expenses()}")
+            bot.send_message(message.chat.id, f"Списано {expense} сомов. Остаток бюджета: {total_budget} сомов.")
         show_categories(message.chat.id)  # Позволяем пользователю выбрать следующую категорию
     except ValueError:
         bot.send_message(message.chat.id,
